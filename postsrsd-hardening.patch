@@ -1,0 +1,58 @@
+diff -up postsrsd-2.0.11/data/postsrsd.service.in.omv~ postsrsd-2.0.11/data/postsrsd.service.in
+--- postsrsd-2.0.11/data/postsrsd.service.in.omv~	2026-02-21 19:37:41.700328422 +0100
++++ postsrsd-2.0.11/data/postsrsd.service.in	2026-02-21 19:38:08.948696721 +0100
+@@ -1,17 +1,47 @@
+-# PostSRSd systemd service file
+-# Copyright 2022-2023 Timo Röhling
+-# SPDX-License-Identifier: FSFUL
+-#
+-# The copyright holder gives unlimited permission to copy, distribute and modify
+-# this file.
+-
+ [Unit]
+ Description=Sender Rewriting Scheme daemon for Postfix
+ Before=postfix.service
+ After=network.target
+ 
+ [Service]
++Type=simple
+ ExecStart=@CMAKE_INSTALL_FULL_SBINDIR@/postsrsd -C @POSTSRSD_CONFIGDIR@/@PROJECT_NAME@.conf
++User=postfix
++Group=postfix
++RuntimeDirectory=postsrsd
++RuntimeDirectoryMode=0750
++
++# Filesystem
++ProtectSystem=strict
++ProtectHome=true
++ReadWritePaths=/etc/postsrsd /run/postsrsd
++PrivateTmp=true
++PrivateDevices=true
++
++# Kernel/system protection
++ProtectKernelTunables=true
++ProtectKernelModules=true
++ProtectKernelLogs=true
++ProtectControlGroups=true
++ProtectClock=true
++ProtectHostname=true
++
++# Privilege escalation
++NoNewPrivileges=true
++RestrictSUIDSGID=true
++
++# Capabilities - purely unprivileged
++CapabilityBoundingSet=
++
++# Network
++RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
++
++# System calls
++SystemCallFilter=@system-service
++SystemCallArchitectures=native
++LockPersonality=true
++RestrictRealtime=true
++RestrictNamespaces=true
+ 
+ [Install]
+ WantedBy=multi-user.target

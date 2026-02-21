@@ -1,0 +1,115 @@
+diff -up postsrsd-2.0.11/CMakeLists.txt.1~ postsrsd-2.0.11/CMakeLists.txt
+--- postsrsd-2.0.11/CMakeLists.txt.1~	2025-04-12 16:51:32.000000000 +0200
++++ postsrsd-2.0.11/CMakeLists.txt	2026-02-21 18:26:31.849929279 +0100
+@@ -125,6 +125,8 @@ mark_as_advanced(
+     POSTSRSD_USER
+ )
+ 
++option(USE_SYSTEM_LIBS "Use system libraries" OFF)
++if(NOT USE_SYSTEM_LIBS)
+ FetchContent_Declare(
+     Confuse
+     URL https://github.com/libconfuse/libconfuse/releases/download/v3.3/confuse-3.3.tar.gz
+@@ -157,6 +159,7 @@ FetchContent_Declare(
+     URL_HASH
+         SHA3_256=bfb856a68c0ea4d930803f6bd16c1eed38910a231c9e0f0009e69310e35e7a5d
+ )
++endif()
+ 
+ set(saved_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
+ list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE" "-D_FILE_OFFSET_BITS=64")
+@@ -200,11 +203,13 @@ endif()
+ set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+ find_package(Threads QUIET)
+ 
++if(NOT USE_SYSTEM_LIBS)
+ add_autotools_dependency(
+     Confuse
+     LIBRARY_NAME confuse
+     EXPORTED_TARGET Confuse::Confuse
+ )
++endif()
+ 
+ if(WITH_REDIS)
+     set(DISABLE_TESTS
+@@ -215,6 +220,7 @@ if(WITH_REDIS)
+         OFF
+         CACHE BOOL "" FORCE
+     )
++    if(NOT USE_SYSTEM_LIBS)
+     FetchContent_MakeAvailable(Hiredis)
+     if(IS_DIRECTORY "${hiredis_SOURCE_DIR}")
+         set_property(
+@@ -233,9 +239,11 @@ if(WITH_REDIS)
+                 "Cannot link against hiredis: no suitable CMake target found"
+         )
+     endif()
++    endif()
+ endif()
+ 
+ if(WITH_MILTER)
++    if(NOT USE_SYSTEM_LIBS)
+     FetchContent_MakeAvailable(LibMilter)
+     if(IS_DIRECTORY "${libmilter_SOURCE_DIR}")
+         string(TOLOWER "${CMAKE_SYSTEM_NAME}" lc_system)
+@@ -282,9 +290,11 @@ if(WITH_MILTER)
+             )
+         endif()
+     endif()
++    endif()
+ endif()
+ 
+ if(WITH_SQLITE)
++    if(NOT USE_SYSTEM_LIBS)
+     FetchContent_MakeAvailable(sqlite3)
+     if(IS_DIRECTORY "${sqlite3_SOURCE_DIR}")
+         add_library(sqlite3 STATIC "${sqlite3_SOURCE_DIR}/sqlite3.c")
+@@ -309,6 +319,7 @@ if(WITH_SQLITE)
+         add_library(sqlite3::sqlite3 ALIAS sqlite3)
+         target_link_libraries(sqlite3 PUBLIC ${CMAKE_DL_LIBS})
+     endif()
++    endif()
+ endif()
+ 
+ configure_file(
+@@ -337,6 +348,16 @@ add_executable(
+ target_compile_definitions(postsrsd PRIVATE _GNU_SOURCE _FILE_OFFSET_BITS=64)
+ target_include_directories(postsrsd PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+ target_compile_features(postsrsd PRIVATE c_std_99)
++if(USE_SYSTEM_LIBS)
++target_link_libraries(
++    postsrsd
++    PRIVATE confuse
++            $<$<BOOL:${WITH_SQLITE}>:sqlite3>
++            $<$<BOOL:${WITH_REDIS}>:hiredis>
++            $<$<BOOL:${WITH_MILTER}>:milter>
++            ${LIBSOCKET}
++            ${LIBNSL})
++else()
+ target_link_libraries(
+     postsrsd
+     PRIVATE Confuse::Confuse
+@@ -346,6 +367,7 @@ target_link_libraries(
+             ${LIBSOCKET}
+             ${LIBNSL}
+ )
++endif()
+ 
+ configure_file(
+     "${CMAKE_CURRENT_SOURCE_DIR}/data/postsrsd.conf.in"
+@@ -415,6 +437,7 @@ install(CODE "\
+ )
+ 
+ if(BUILD_TESTING)
++    if(NOT USE_SYSTEM_LIBS)
+     FetchContent_MakeAvailable(Check)
+     if(IS_DIRECTORY "${check_SOURCE_DIR}")
+         # Workaround for https://github.com/roehling/postsrsd/issues/161
+@@ -427,6 +450,7 @@ if(BUILD_TESTING)
+         endif()
+     endif()
+     add_subdirectory(tests)
++    endif()
+ endif()
+ 
+ feature_summary(WHAT ENABLED_FEATURES DISABLED_FEATURES)

@@ -1,0 +1,12 @@
+diff -up postsrsd-2.0.11/src/main.c.omv~ postsrsd-2.0.11/src/main.c
+--- postsrsd-2.0.11/src/main.c.omv~	2026-02-21 19:43:32.586283202 +0100
++++ postsrsd-2.0.11/src/main.c	2026-02-21 19:44:39.626068136 +0100
+@@ -106,7 +106,7 @@ static bool drop_privileges(cfg_t* cfg)
+         return false;
+ #endif
+     }
+-    if (target_uid != 0 || target_gid != 0)
++    if (target_uid != getuid() || target_gid != getgid())
+     {
+ #ifdef HAVE_SETGROUPS
+         if (setgroups(0, NULL) < 0)

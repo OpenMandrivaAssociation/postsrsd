@@ -1,0 +1,40 @@
+diff -up postsrsd-2.0.11/data/postsrsd.conf.in.3~ postsrsd-2.0.11/data/postsrsd.conf.in
+--- postsrsd-2.0.11/data/postsrsd.conf.in.3~	2025-04-12 16:51:32.000000000 +0200
++++ postsrsd-2.0.11/data/postsrsd.conf.in	2026-02-21 19:36:33.775469881 +0100
+@@ -11,7 +11,7 @@
+ # Example:
+ #     domains = { "example.com", "example.org", "example.net" }
+ #
+-domains = {}
++#domains = {}
+ 
+ # Local domains (file storage)
+ # Instead of listing your local domains directly, you can also write them to a
+@@ -23,7 +23,7 @@ domains = {}
+ # Example:
+ #     domains-file = "@POSTSRSD_CONFIGDIR@/@PROJECT_NAME@.domains"
+ #
+-#domains-file =
++domains-file = /etc/postfix/domains
+ 
+ # Dedicated SRS rewrite domain.
+ # The local domain which is used to create the ephemeral SRS envelope
+@@ -47,7 +47,7 @@ domains = {}
+ #     socketmap = unix:/var/spool/postfix/srs
+ #     socketmap = inet:localhost:10003
+ #
+-socketmap = unix:/var/spool/postfix/srs
++socketmap = unix:/run/postsrsd/srs
+ 
+ # Socketmap connection keep-alive timeout.
+ # After PostSRSd has served a socketmap request, it will keep the connection
+@@ -174,7 +174,8 @@ unprivileged-user = "@POSTSRSD_USER@"
+ # Example:
+ #     chroot-dir = "@CMAKE_INSTALL_FULL_LOCALSTATEDIR@/lib/@PROJECT_NAME@"
+ #
+-chroot-dir = "@POSTSRSD_CHROOTDIR@"
++# We don't need chroot because we use systemd hardening
++chroot-dir = ""
+ 
+ # Syslog
+ # PostSRSd writes log messages to stderr. If you enable this option, PostSRSd
