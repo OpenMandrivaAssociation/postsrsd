@@ -10,6 +10,7 @@ BuildSystem:	cmake
 BuildRequires:	cmake
 BuildRequires:	pkgconfig(sqlite3)
 BuildRequires:	pkgconfig(libconfuse)
+BuildRequires:	pkgconfig(systemd)
 BuildOption:	-DUSE_SYSTEM_LIBS:BOOL=ON
 BuildOption:	-DPOSTSRSD_CONFIGDIR=%{_sysconfdir}/postsrsd
 BuildOption:	-DFETCHCONTENT_FULLY_DISCONNECTED:BOOL=ON
