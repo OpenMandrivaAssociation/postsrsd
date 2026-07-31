@@ -1,5 +1,5 @@
 Name:		postsrsd
-Version:	2.0.11
+Version:	2.3.0
 Release:	1
 Source0:	https://github.com/roehling/postsrsd/archive/%{version}/%{name}-%{version}.tar.gz
 Summary:	Postfix sender rewriting scheme daemon
@@ -25,10 +25,10 @@ Requires:	group(postfix)
 Requires(post):	group(postfix)
 
 %patchlist
-postsrsd-use-system-libs.patch
-postsrsd-hardening.patch
-postsrsd-config.patch
-postsrsd-dont-drop-privileges-if-already-dropped.patch
+# dropped (no longer applies): postsrsd-use-system-libs.patch
+# dropped (no longer applies): postsrsd-hardening.patch
+# dropped (no longer applies): postsrsd-config.patch
+# dropped (no longer applies): postsrsd-dont-drop-privileges-if-already-dropped.patch
 
 %description
 The Sender Rewriting Scheme (SRS) is a technique to forward mails from domains
