@@ -4,20 +4,23 @@ Release:	1
 Source0:	https://github.com/roehling/postsrsd/archive/%{version}/%{name}-%{version}.tar.gz
 Summary:	Postfix sender rewriting scheme daemon
 URL:		https://github.com/roehling/postsrsd
-License:	GPL
+License:	GPL-3.0-only
 Group:		Servers
 BuildSystem:	cmake
 BuildRequires:	cmake
 BuildRequires:	pkgconfig(sqlite3)
 BuildRequires:	pkgconfig(libconfuse)
+BuildRequires:	pkgconfig(check)
 BuildRequires:	pkgconfig(systemd)
-BuildOption:	-DUSE_SYSTEM_LIBS:BOOL=ON
-BuildOption:	-DPOSTSRSD_CONFIGDIR=%{_sysconfdir}/postsrsd
+BuildRequires:	python
+# 2.4 fetches bundled deps unless find_package is forced. No network in the build.
 BuildOption:	-DFETCHCONTENT_FULLY_DISCONNECTED:BOOL=ON
+BuildOption:	-DFETCHCONTENT_TRY_FIND_PACKAGE_MODE=ALWAYS
+BuildOption:	-DPOSTSRSD_CONFIGDIR=%{_sysconfdir}/postsrsd
 BuildOption:	-DGENERATE_SRS_SECRET:BOOL=OFF
+BuildOption:	-DINSTALL_SYSTEMD_SYSUSERS:BOOL=OFF
 BuildOption:	-DWITH_SQLITE:BOOL=ON
 BuildOption:	-DPOSTSRSD_USER=postfix
-BuildOption:	-DPOSTSRSD_GROUP=postfix
 Requires:	postfix
 Requires:	awk
 Requires:	user(postfix)
@@ -42,8 +45,12 @@ prevents abuse by spammers.
 %install -a
 mkdir -p %{buildroot}%{_sysconfdir}/postsrsd
 mv %{buildroot}%{_docdir}/postsrsd/postsrsd.conf %{buildroot}%{_sysconfdir}/postsrsd/
+rmdir %{buildroot}%{_docdir}/postsrsd
 # We share the postfix user
 rm -rf %{buildroot}%{_sysusersdir}
+
+%check
+ctest --test-dir _OMV_rpm_build --output-on-failure
 
 %post
 if [[ ! -f %{_sysconfdir}/postsrsd/postsrsd.secret ]]; then
