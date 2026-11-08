@@ -1,5 +1,5 @@
 Name:		postsrsd
-Version:	2.3.0
+Version:	2.4.1
 Release:	1
 Source0:	https://github.com/roehling/postsrsd/archive/%{version}/%{name}-%{version}.tar.gz
 Summary:	Postfix sender rewriting scheme daemon
@@ -55,7 +55,11 @@ fi
 
 %files
 %dir %{_sysconfdir}/postsrsd
-%ghost %attr(0644, root, postfix) %{_sysconfdir}/postsrsd/postsrsd.secret
+%ghost %attr(0640, root, postfix) %{_sysconfdir}/postsrsd/postsrsd.secret
+# The chroot jail: upstream's unit names it in ReadWritePaths=, and systemd
+# refuses to start the service when it is missing (226/NAMESPACE). CMake
+# creates it in the buildroot, but an unlisted empty directory is dropped.
+%dir %attr(0755, root, root) %{_localstatedir}/lib/postsrsd
 %config(noreplace) %{_sysconfdir}/postsrsd/postsrsd.conf
 %{_bindir}/postsrsd
 %{_unitdir}/postsrsd.service
